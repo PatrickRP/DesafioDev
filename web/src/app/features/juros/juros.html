@@ -1,0 +1,78 @@
+<section class="cabecalho">
+  <h1>Juros por atraso</h1>
+  <p class="regra">
+    Juros simples de 2,5% ao dia sobre o valor original, contados em dias corridos a partir do dia
+    seguinte ao vencimento. Pago até o vencimento, não há encargo.
+  </p>
+</section>
+
+<form [formGroup]="form" (ngSubmit)="calcular()" novalidate class="form">
+  <mat-form-field>
+    <mat-label>Valor</mat-label>
+    <span matTextPrefix>R$&nbsp;</span>
+    <input
+      matInput
+      formControlName="valor"
+      inputmode="decimal"
+      autocomplete="off"
+      placeholder="1.234,56"
+    />
+    @let v = form.controls.valor;
+    @if (v.hasError('api')) {
+      <mat-error>{{ v.getError('api') }}</mat-error>
+    } @else if (v.hasError('valorMonetario')) {
+      <mat-error>Use 1.234,56 ou 1234.56, maior que zero.</mat-error>
+    } @else {
+      <mat-error>Informe o valor.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Vencimento</mat-label>
+    <input
+      matInput
+      [matDatepicker]="calendario"
+      formControlName="vencimento"
+      placeholder="dd/mm/aaaa"
+    />
+    <mat-datepicker-toggle matIconSuffix [for]="calendario" />
+    <mat-datepicker #calendario />
+    @if (form.controls.vencimento.hasError('matDatepickerParse')) {
+      <mat-error>Data inválida. Use dd/mm/aaaa.</mat-error>
+    } @else {
+      <mat-error>Informe o vencimento.</mat-error>
+    }
+  </mat-form-field>
+
+  <button matButton="filled" type="submit" [disabled]="calculando()">Calcular juros</button>
+</form>
+
+@if (resultado(); as r) {
+  <section class="resultado" aria-live="polite">
+    @if (r.diasAtraso === 0) {
+      <p class="em-dia">
+        Em dia. Vencimento em {{ r.vencimento | date: 'dd/MM/yyyy' }}, sem juros até
+        {{ r.dataCalculo | date: 'dd/MM/yyyy' }}.
+      </p>
+    } @else {
+      <dl class="conta">
+        <div>
+          <dt>Valor original</dt>
+          <dd>{{ r.valorOriginal | currency }}</dd>
+        </div>
+        <div>
+          <dt>
+            Juros ({{ r.diasAtraso }} {{ r.diasAtraso === 1 ? 'dia' : 'dias' }} ×
+            {{ r.taxaDiaria | percent: '1.1-1' }})
+          </dt>
+          <dd class="juros">+ {{ r.juros | currency }}</dd>
+        </div>
+        <div class="total">
+          <dt>Valor atualizado em {{ r.dataCalculo | date: 'dd/MM/yyyy' }}</dt>
+          <dd>{{ r.valorAtualizado | currency }}</dd>
+        </div>
+      </dl>
+      <p class="nota">Vencido em {{ r.vencimento | date: 'dd/MM/yyyy' }}.</p>
+    }
+  </section>
+}

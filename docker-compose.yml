@@ -1,0 +1,37 @@
+name: desafio-dev
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/DesafioDev.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # O cálculo de juros usa a data local do servidor; em UTC, a partir das 20h/21h no Brasil
+      # o "hoje" do contêiner já seria amanhã. Troque pelo fuso onde o sistema opera.
+      TZ: ${TZ:-America/Campo_Grande}
+    volumes:
+      - estoque-dados:/app/dados
+    healthcheck:
+      # A imagem aspnet não tem curl. A porta só abre depois que a migration e a carga inicial
+      # terminam (rodam antes do app.Run), então porta aberta = API pronta.
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  # Volume nomeado e não bind mount: SQLite em WAL depende de lock de arquivo, que não é
+  # confiável em pastas do Windows montadas no contêiner.
+  estoque-dados:

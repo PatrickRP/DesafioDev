@@ -1,0 +1,25 @@
+@api = http://localhost:5080/api
+
+### Comissões
+GET {{api}}/comissoes
+
+### Produtos
+GET {{api}}/estoque/produtos
+
+### Saída
+POST {{api}}/estoque/movimentacoes
+Content-Type: application/json
+
+{ "codigoProduto": 101, "tipo": "Saida", "quantidade": 30, "descricao": "Venda balcão NF 123" }
+
+### Saída maior que o saldo (422)
+POST {{api}}/estoque/movimentacoes
+Content-Type: application/json
+
+{ "codigoProduto": 102, "tipo": "Saida", "quantidade": 1000, "descricao": "Teste" }
+
+### Histórico de um produto
+GET {{api}}/estoque/movimentacoes?codigoProduto=101
+
+### Juros
+GET {{api}}/juros?valor=1000.00&vencimento=2026-09-25

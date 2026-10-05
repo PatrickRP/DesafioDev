@@ -1,0 +1,25 @@
+<header class="topo">
+  <div class="topo__conteudo">
+    <span class="marca">Desafio Dev</span>
+    <nav mat-tab-nav-bar mat-stretch-tabs="false" [tabPanel]="painel" aria-label="Seções">
+      @for (s of secoes; track s.rota) {
+        <a
+          mat-tab-link
+          [routerLink]="s.rota"
+          routerLinkActive
+          #ativo="routerLinkActive"
+          [active]="ativo.isActive"
+        >
+          <mat-icon aria-hidden="true">{{ s.icone }}</mat-icon>
+          <span>{{ s.rotulo }}</span>
+        </a>
+      }
+    </nav>
+  </div>
+</header>
+
+<mat-tab-nav-panel #painel>
+  <main class="conteudo">
+    <router-outlet />
+  </main>
+</mat-tab-nav-panel>

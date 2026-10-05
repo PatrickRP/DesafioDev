@@ -1,0 +1,10 @@
+# Contexto do build da API (raiz). O front tem contexto e .dockerignore próprios.
+**/bin
+**/obj
+**/*.db
+**/*.db-shm
+**/*.db-wal
+.vs
+.git
+web
+tests

@@ -1,0 +1,221 @@
+.cabecalho h1 {
+  font: var(--mat-sys-headline-small);
+  margin: 0 0 24px;
+}
+
+h2 {
+  font: var(--mat-sys-title-medium);
+  margin: 0 0 16px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(300px, 400px) 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tipo {
+  align-self: flex-start;
+}
+
+button[type='submit'] {
+  align-self: flex-start;
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+}
+
+// O momento que importa na tela: o saldo antes e depois, grande, com a cor do tipo.
+.resultado {
+  --cor: var(--mat-sys-primary);
+  --fundo: var(--mat-sys-primary-container);
+  --texto: var(--mat-sys-on-primary-container);
+
+  margin-top: 28px;
+  padding: 20px 24px;
+  border-left: 4px solid var(--cor);
+  background: var(--fundo);
+  color: var(--texto);
+  border-radius: 0 12px 12px 0;
+  animation: surgir 240ms ease-out;
+
+  p {
+    margin: 0;
+  }
+
+  &--saida {
+    --cor: var(--mat-sys-tertiary);
+    --fundo: var(--mat-sys-tertiary-container);
+    --texto: var(--mat-sys-on-tertiary-container);
+  }
+}
+
+.resultado__titulo {
+  font: var(--mat-sys-label-large);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.resultado__hora {
+  opacity: 0.75;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.resultado__produto {
+  font: var(--mat-sys-title-medium);
+  margin-top: 12px !important;
+}
+
+.resultado__saldo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 4px 0 8px !important;
+
+  .anterior {
+    opacity: 0.45;
+    font-weight: 500;
+  }
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    opacity: 0.6;
+  }
+
+  .final {
+    color: var(--cor);
+  }
+}
+
+.resultado__delta {
+  font: var(--mat-sys-body-medium);
+}
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultado {
+    animation: none;
+  }
+}
+
+.tabela {
+  width: 100%;
+}
+
+.linha {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+.linha--selecionada {
+  background: var(--mat-sys-surface-container);
+}
+
+.linha--movida td.forte {
+  color: var(--mat-sys-primary);
+}
+
+.forte {
+  font-weight: 600;
+}
+
+.historico {
+  margin-top: 48px;
+}
+
+.historico__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.filtro {
+  width: 260px;
+}
+
+.tabela-rolagem {
+  overflow-x: auto;
+}
+
+.tabela--historico {
+  min-width: 760px;
+}
+
+.descricao {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seta {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 4px;
+}
+
+.tipo-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  &--saida {
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+  }
+}
+
+.vazio {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 860px) {
+  .grade {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .historico__topo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtro {
+    width: auto;
+  }
+}

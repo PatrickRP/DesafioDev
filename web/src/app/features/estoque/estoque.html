@@ -1,0 +1,214 @@
+<section class="cabecalho">
+  <h1>Movimentação de estoque</h1>
+</section>
+
+<div class="grade">
+  <section class="painel" aria-labelledby="titulo-form">
+    <h2 id="titulo-form">Nova movimentação</h2>
+
+    <form [formGroup]="form" (ngSubmit)="registrar(formDir)" #formDir="ngForm" novalidate>
+      <mat-button-toggle-group
+        formControlName="tipo"
+        aria-label="Tipo de movimentação"
+        class="tipo"
+        hideSingleSelectionIndicator
+      >
+        <mat-button-toggle value="Entrada"><mat-icon>add</mat-icon> Entrada</mat-button-toggle>
+        <mat-button-toggle value="Saida"><mat-icon>remove</mat-icon> Saída</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-form-field>
+        <mat-label>Produto</mat-label>
+        <mat-select formControlName="codigoProduto">
+          @for (p of produtos(); track p.codigo) {
+            <mat-option [value]="p.codigo"
+              ><span class="codigo">{{ p.codigo }}</span> {{ p.descricao }}</mat-option
+            >
+          }
+        </mat-select>
+        @if (produtoSelecionado(); as p) {
+          <mat-hint>Saldo atual: {{ p.quantidade | number }} un.</mat-hint>
+        }
+        <mat-error>Escolha o produto.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Quantidade</mat-label>
+        <input
+          matInput
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          formControlName="quantidade"
+        />
+        @let q = form.controls.quantidade;
+        @if (q.hasError('saldoInsuficiente')) {
+          <mat-error
+            >Saldo insuficiente: há
+            {{ q.getError('saldoInsuficiente').disponivel | number }} un.</mat-error
+          >
+        } @else if (q.hasError('api')) {
+          <mat-error>{{ q.getError('api') }}</mat-error>
+        } @else if (q.hasError('min') || q.hasError('inteiro')) {
+          <mat-error>Informe um número inteiro maior que zero.</mat-error>
+        } @else {
+          <mat-error>Informe a quantidade.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Descrição</mat-label>
+        <input
+          matInput
+          formControlName="descricao"
+          maxlength="200"
+          placeholder="Ex.: Compra NF 4521"
+        />
+        @let d = form.controls.descricao;
+        @if (d.hasError('api')) {
+          <mat-error>{{ d.getError('api') }}</mat-error>
+        } @else {
+          <mat-error>Descreva a movimentação.</mat-error>
+        }
+      </mat-form-field>
+
+      <button matButton="filled" type="submit" [disabled]="enviando()">
+        @if (enviando()) {
+          <mat-spinner diameter="18" aria-label="Registrando" />
+        }
+        Registrar {{ tipoSelecionado() === 'Saida' ? 'saída' : 'entrada' }}
+      </button>
+    </form>
+
+    @if (ultima(); as m) {
+      <div
+        class="resultado"
+        [class.resultado--saida]="m.tipo === 'Saida'"
+        role="status"
+        aria-live="polite"
+      >
+        <p class="resultado__titulo">
+          Movimentação nº {{ m.id }} registrada
+          <span class="resultado__hora">{{ m.dataHora | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </p>
+        <p class="resultado__produto">{{ nomeDoProduto(m.codigoProduto) }}</p>
+        <p class="resultado__saldo">
+          <span class="anterior">{{ m.estoqueAnterior | number }}</span>
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          <span class="final">{{ m.estoqueFinal | number }}</span>
+          <span class="cdk-visually-hidden">unidades em estoque</span>
+        </p>
+        <p class="resultado__delta">
+          {{ m.tipo === 'Saida' ? 'Saída' : 'Entrada' }} de {{ m.quantidade | number }} un.:
+          {{ m.descricao }}
+        </p>
+      </div>
+    }
+  </section>
+
+  <section class="painel" aria-labelledby="titulo-saldos">
+    <h2 id="titulo-saldos">Saldos</h2>
+    <table mat-table [dataSource]="produtos()" class="tabela">
+      <ng-container matColumnDef="codigo">
+        <th mat-header-cell *matHeaderCellDef>Código</th>
+        <td mat-cell *matCellDef="let p">{{ p.codigo }}</td>
+      </ng-container>
+      <ng-container matColumnDef="descricao">
+        <th mat-header-cell *matHeaderCellDef>Produto</th>
+        <td mat-cell *matCellDef="let p">{{ p.descricao }}</td>
+      </ng-container>
+      <ng-container matColumnDef="quantidade">
+        <th mat-header-cell *matHeaderCellDef class="num">Saldo</th>
+        <td mat-cell *matCellDef="let p" class="num forte">{{ p.quantidade | number }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="colunasProdutos"></tr>
+      <tr
+        mat-row
+        *matRowDef="let p; columns: colunasProdutos"
+        class="linha"
+        [class.linha--selecionada]="p.codigo === produtoSelecionado()?.codigo"
+        [class.linha--movida]="p.codigo === ultima()?.codigoProduto"
+        (click)="selecionar(p)"
+        title="Usar este produto na movimentação"
+      ></tr>
+    </table>
+  </section>
+</div>
+
+<section class="historico" aria-labelledby="titulo-historico">
+  <div class="historico__topo">
+    <h2 id="titulo-historico">Histórico</h2>
+    <mat-form-field class="filtro">
+      <mat-label>Filtrar histórico</mat-label>
+      <!-- 0 = todos: com null o mat-select se considera vazio e o rótulo não fica visível. -->
+      <mat-select [value]="filtro() ?? 0" (selectionChange)="filtrar($event.value || null)">
+        <mat-option [value]="0">Todos os produtos</mat-option>
+        @for (p of produtos(); track p.codigo) {
+          <mat-option [value]="p.codigo">{{ p.descricao }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (movimentacoes().length === 0) {
+    <p class="vazio">
+      Nenhuma movimentação{{ filtro() ? ' para este produto' : '' }} ainda. Registre uma entrada ou
+      saída acima.
+    </p>
+  } @else {
+    <div class="tabela-rolagem">
+      <table mat-table [dataSource]="paginaAtual()" class="tabela tabela--historico">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef class="num">Nº</th>
+          <td mat-cell *matCellDef="let m" class="num">{{ m.id }}</td>
+        </ng-container>
+        <ng-container matColumnDef="dataHora">
+          <th mat-header-cell *matHeaderCellDef>Data</th>
+          <td mat-cell *matCellDef="let m">{{ m.dataHora | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="produto">
+          <th mat-header-cell *matHeaderCellDef>Produto</th>
+          <td mat-cell *matCellDef="let m">{{ nomeDoProduto(m.codigoProduto) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let m">
+            <span class="tipo-tag" [class.tipo-tag--saida]="m.tipo === 'Saida'">
+              {{ m.tipo === 'Saida' ? 'Saída' : 'Entrada' }}
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantidade">
+          <th mat-header-cell *matHeaderCellDef class="num">Qtde</th>
+          <td mat-cell *matCellDef="let m" class="num">
+            {{ m.tipo === 'Saida' ? '−' : '+' }}{{ m.quantidade | number }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="saldo">
+          <th mat-header-cell *matHeaderCellDef class="num">Saldo</th>
+          <td mat-cell *matCellDef="let m" class="num">
+            {{ m.estoqueAnterior | number }} <span class="seta">›</span>
+            <strong>{{ m.estoqueFinal | number }}</strong>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="descricao">
+          <th mat-header-cell *matHeaderCellDef>Descrição</th>
+          <td mat-cell *matCellDef="let m" class="descricao">{{ m.descricao }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
+        <tr mat-row *matRowDef="let m; columns: colunasHistorico"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="movimentacoes().length"
+      [pageIndex]="pagina()"
+      [pageSize]="tamanhoPagina()"
+      [pageSizeOptions]="[10, 25, 50]"
+      (page)="mudarPagina($event)"
+    />
+  }
+</section>

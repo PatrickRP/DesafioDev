@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Produto.Movimentar é internal: só os serviços de estoque (memória e EF) alteram saldo. -->
+    <InternalsVisibleTo Include="DesafioDev.Infra" />
+  </ItemGroup>
+
+</Project>

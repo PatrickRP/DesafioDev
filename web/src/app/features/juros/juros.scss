@@ -1,0 +1,93 @@
+.cabecalho {
+  margin-bottom: 28px;
+
+  h1 {
+    font: var(--mat-sys-headline-small);
+    margin: 0 0 8px;
+  }
+}
+
+.regra {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+
+  mat-form-field {
+    width: 220px;
+  }
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+.resultado {
+  margin-top: 32px;
+  max-width: 520px;
+}
+
+// Lido como uma conta: valor, + juros, = total.
+.conta {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    font: var(--mat-sys-title-medium);
+  }
+
+  .juros {
+    color: var(--mat-sys-error);
+  }
+
+  .total {
+    border-bottom: 2px solid var(--mat-sys-on-surface);
+
+    dt {
+      color: var(--mat-sys-on-surface);
+      font-weight: 600;
+    }
+
+    dd {
+      font: var(--mat-sys-headline-small);
+      font-weight: 700;
+    }
+  }
+}
+
+.nota,
+.em-dia {
+  margin: 12px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.em-dia {
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-primary);
+}
+
+@media (max-width: 520px) {
+  .form mat-form-field {
+    width: 100%;
+  }
+}

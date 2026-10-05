@@ -1,0 +1,56 @@
+@use '@angular/material' as mat;
+@use '@angular/cdk';
+
+// .cdk-visually-hidden: rótulos só para leitor de tela (cabeçalho da coluna de ação, caption das tabelas).
+@include cdk.a11y-visually-hidden();
+
+html {
+  height: 100%;
+  // Verde de livro-caixa para o primário (entradas, totais) e azul no terciário (saídas):
+  // os dois tipos de movimentação ficam distinguíveis sem recorrer ao vermelho, que é reservado para juros e erros.
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$green-palette,
+        tertiary: mat.$azure-palette,
+      ),
+      typography: (
+        plain-family: 'Public Sans, system-ui, sans-serif',
+        brand-family: 'Public Sans, system-ui, sans-serif',
+      ),
+      density: 0,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  min-height: 100%;
+}
+
+// Números alinhados à direita e com largura fixa por dígito: colunas de valores se leem na vertical.
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.codigo {
+  color: var(--mat-sys-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  margin-right: 6px;
+}
+
+.snack-erro {
+  --mat-snack-bar-container-color: var(--mat-sys-error-container);
+  --mat-snack-bar-supporting-text-color: var(--mat-sys-on-error-container);
+  --mat-snack-bar-button-color: var(--mat-sys-on-error-container);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}

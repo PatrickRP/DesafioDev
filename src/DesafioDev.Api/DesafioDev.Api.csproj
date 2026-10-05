@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Necessário só para o `dotnet ef` (migrations); não vai para o publish. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DesafioDev.Core\DesafioDev.Core.csproj" />
+    <ProjectReference Include="..\DesafioDev.Infra\DesafioDev.Infra.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\data\*.json" Link="Data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

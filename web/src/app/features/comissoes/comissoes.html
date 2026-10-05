@@ -1,0 +1,126 @@
+<section class="cabecalho">
+  <h1>Comissões por vendedor</h1>
+  <p class="regra">
+    Cada venda é comissionada pela própria faixa: abaixo de R$ 100 não gera comissão, de R$ 100 até
+    R$ 499,99 gera 1% e a partir de R$ 500 gera 5%.
+  </p>
+</section>
+
+@if (carregando()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Carregando comissões" />
+}
+
+@if (falhou()) {
+  <p class="vazio">
+    Não foi possível carregar as vendas. Confira se a API está rodando e recarregue a página.
+  </p>
+}
+
+@if (dados(); as d) {
+  <dl class="resumo">
+    <div>
+      <dt>Total vendido</dt>
+      <dd>{{ d.totalVendido | currency }}</dd>
+    </div>
+    <div>
+      <dt>Total de comissões</dt>
+      <dd class="destaque">{{ d.totalComissao | currency }}</dd>
+    </div>
+    <div>
+      <dt>Comissão sobre o vendido</dt>
+      <dd>{{ taxaEfetiva() | percent: '1.2-2' }}</dd>
+    </div>
+  </dl>
+
+  <div class="tabela-rolagem">
+    <table mat-table [dataSource]="d.vendedores" multiTemplateDataRows class="tabela">
+      <ng-container matColumnDef="vendedor">
+        <th mat-header-cell *matHeaderCellDef>Vendedor</th>
+        <td mat-cell *matCellDef="let v">{{ v.vendedor }}</td>
+        <td mat-footer-cell *matFooterCellDef>Total</td>
+      </ng-container>
+
+      <ng-container matColumnDef="vendas">
+        <th mat-header-cell *matHeaderCellDef class="num">Vendas comissionadas</th>
+        <td mat-cell *matCellDef="let v" class="num">
+          {{ v.vendasComissionadas }} de {{ v.quantidadeVendas }}
+        </td>
+        <td mat-footer-cell *matFooterCellDef class="num">{{ d.quantidadeVendas }} vendas</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalVendido">
+        <th mat-header-cell *matHeaderCellDef class="num">Total vendido</th>
+        <td mat-cell *matCellDef="let v" class="num">{{ v.totalVendido | currency }}</td>
+        <td mat-footer-cell *matFooterCellDef class="num">{{ d.totalVendido | currency }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalComissao">
+        <th mat-header-cell *matHeaderCellDef class="num">Comissão</th>
+        <td mat-cell *matCellDef="let v" class="num forte">{{ v.totalComissao | currency }}</td>
+        <td mat-footer-cell *matFooterCellDef class="num forte">
+          {{ d.totalComissao | currency }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="expandir">
+        <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Detalhar</span></th>
+        <td mat-cell *matCellDef="let v" class="acao">
+          <button
+            matIconButton
+            type="button"
+            [attr.aria-expanded]="aberto() === v.vendedor"
+            [attr.aria-label]="'Ver vendas de ' + v.vendedor"
+            (click)="alternar(v); $event.stopPropagation()"
+          >
+            <mat-icon>{{ aberto() === v.vendedor ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+        </td>
+        <td mat-footer-cell *matFooterCellDef></td>
+      </ng-container>
+
+      <ng-container matColumnDef="detalhe">
+        <td mat-cell *matCellDef="let v" [attr.colspan]="colunas.length" class="celula-detalhe">
+          @if (aberto() === v.vendedor) {
+            <table class="vendas">
+              <caption class="cdk-visually-hidden">
+                Vendas de
+                {{
+                  v.vendedor
+                }}
+              </caption>
+              <thead>
+                <tr>
+                  <th class="num">Valor da venda</th>
+                  <th class="num">Faixa</th>
+                  <th class="num">Comissão</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (venda of v.vendas; track $index) {
+                  <tr [class.sem-comissao]="venda.percentual === 0">
+                    <td class="num">{{ venda.valor | currency }}</td>
+                    <td class="num">
+                      {{ venda.percentual === 0 ? 'sem comissão' : (venda.percentual | percent) }}
+                    </td>
+                    <td class="num">{{ venda.comissao | currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+      <tr
+        mat-row
+        *matRowDef="let v; columns: colunas"
+        class="linha"
+        [class.linha--aberta]="aberto() === v.vendedor"
+        (click)="alternar(v)"
+      ></tr>
+      <tr mat-row *matRowDef="let v; columns: ['detalhe']" class="linha-detalhe"></tr>
+      <tr mat-footer-row *matFooterRowDef="colunas"></tr>
+    </table>
+  </div>
+}
